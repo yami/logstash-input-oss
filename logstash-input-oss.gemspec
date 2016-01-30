@@ -8,7 +8,7 @@ Gem::Specification.new do |s|
   s.email = 'yamisoe@hotmail.com'
   s.require_paths = ['lib']
 
-  s.files = Dir['lib/**/*', '*.gemspec', '*.md']
+  s.files = `git ls-files`.split($/)
 
   # Special flag to let us know this is actually a logstash plugin
   s.metadata = { "logstash_plugin" => "true", "logstash_group" => "input" }
