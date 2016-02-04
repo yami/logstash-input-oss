@@ -14,7 +14,9 @@ Gem::Specification.new do |s|
   s.metadata = { "logstash_plugin" => "true", "logstash_group" => "input" }
 
   # Gem dependencies
-  s.add_runtime_dependency "logstash-core", ">= 2.0.0", "< 3.0.0"
+  s.add_dependency "aliyun-sdk", "~> 0.3.6"
+
+  s.add_runtime_dependency "logstash-core", "~> 2.0.0"
   s.add_runtime_dependency 'stud', '~> 0.0.18'
   s.add_development_dependency 'logstash-devutils'
   s.add_development_dependency 'simplecov'

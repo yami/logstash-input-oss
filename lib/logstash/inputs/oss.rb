@@ -29,7 +29,7 @@ class LogStash::Inputs::Oss < LogStash::Inputs::Base
   config :db_path, :validate => :string, :default => nil
 
   config :temp_dir, :validate => :string, :default => File.join(Dir.tmpdir, "logstash-inputs-oss")
-  
+
   def register
     @oss_client = Aliyun::OSS::Client.new(
                                           :endpoint => @endpoint,
@@ -60,7 +60,7 @@ class LogStash::Inputs::Oss < LogStash::Inputs::Base
   end
 
   def new_objects
-    @oss_bucket.list_objects(:prefix=@prefix, :marker=@sincedb.marker)
+    @oss_bucket.list_objects(:prefix => @prefix, :marker => @sincedb.marker)
   end
 
   def process_new_objects(queue)
@@ -110,17 +110,17 @@ class LogStash::Inputs::Oss < LogStash::Inputs::Base
       file.each(&block)
     end
   end
-  
-  
+
+
   private
   module SinceDB
     class File
       def initialize(filename)
         @filename = filename
 
-        dirname = File.dirname(@filename)
+        dirname = ::File.dirname(@filename)
         unless Dir.exists?(dirname)
-          Dir.mkdir_p(dirname)
+          FileUtils.mkdir_p(dirname)
         end
 
         unless ::File.exists?(@filename)
