@@ -40,6 +40,8 @@ class LogStash::Inputs::Oss < LogStash::Inputs::Base
     @sincedb = SinceDB::File.new(sincedb_file(@db_path))
 
     FileUtils.mkdir_p(@temp_dir) unless Dir.exists?(@temp_dir)
+
+    @logger.info("register", :sincedb_file => sincedb_file(@db_path))
   end
 
   def run(queue)
@@ -56,7 +58,7 @@ class LogStash::Inputs::Oss < LogStash::Inputs::Base
 
   def sincedb_file(pathname)
     pathname ||= File.join(ENV["HOME"], ".logstash-input-oss")
-    filename = File.join(pathname, "db-#{@bucket}-" + Digest::MD5.hexdigest("#{@prefix}"))
+    return File.join(pathname, "db-#{@bucket}-" + Digest::MD5.hexdigest("#{@prefix}"))
   end
 
   def new_objects
@@ -76,15 +78,16 @@ class LogStash::Inputs::Oss < LogStash::Inputs::Base
 
   def process_one_object(queue, key)
     filename = local_filename(key)
+
     @oss_bucket.get_object(key, :file => filename)
 
+    @logger.info("start processing ", :bucket => @bucket, :key => key, :file => filename)
+    
     read_file(filename) do |line|
       if stop?
         @logger.info("stop while reading the log file")
         return false
       end
-
-      @logger.info("start processing ", :bucket => @bucket, :key => key, :file => filename)
 
       @codec.decode(line) do |event|
         decorate(event)
@@ -92,8 +95,6 @@ class LogStash::Inputs::Oss < LogStash::Inputs::Base
       end
 
       @sincedb.marker = key
-
-      @logger.info("finish processing ", :bucket => @bucket, :key => key, :file => filename)
     end
 
     FileUtils.remove_entry_secure(filename, true)
@@ -105,7 +106,7 @@ class LogStash::Inputs::Oss < LogStash::Inputs::Base
     File.join(@temp_dir, Digest::MD5.hexdigest(key))
   end
 
-  def read_file(filename, block)
+  def read_file(filename, &block)
     File.open(filename, 'rb') do |file|
       file.each(&block)
     end
