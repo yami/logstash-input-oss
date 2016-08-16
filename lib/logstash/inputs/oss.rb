@@ -10,6 +10,7 @@ require "fileutils"
 require "digest/md5"
 
 require 'aliyun/oss'
+require 'snappy'
 
 class LogStash::Inputs::Oss < LogStash::Inputs::Base
   config_name "oss"
@@ -29,6 +30,9 @@ class LogStash::Inputs::Oss < LogStash::Inputs::Base
   config :db_path, :validate => :string, :default => nil
 
   config :temp_dir, :validate => :string, :default => File.join(Dir.tmpdir, "logstash-inputs-oss")
+
+  config :compression_type, :validate => :string, :default => "none"
+
 
   def register
     @oss_client = Aliyun::OSS::Client.new(
@@ -76,6 +80,12 @@ class LogStash::Inputs::Oss < LogStash::Inputs::Base
     end
   end
 
+  def unzip_snappy_file(temp_dir,filename)
+    documents=File.read(File.join(filename))
+    documents=Snappy.inflate(documents)
+    File.write(File.join(filename),documents)
+  end
+
   def process_one_object(queue, key)
     filename = local_filename(key)
 
@@ -83,6 +93,10 @@ class LogStash::Inputs::Oss < LogStash::Inputs::Base
 
     @logger.info("start processing ", :bucket => @bucket, :key => key, :file => filename)
     
+    if compression_type == "snappy"
+      unzip_snappy_file(@temp_dir,filename)
+    end
+
     read_file(filename) do |line|
       if stop?
         @logger.info("stop while reading the log file")
