@@ -42,7 +42,7 @@ class LogStash::Inputs::Oss < LogStash::Inputs::Base
     @oss_bucket = @oss_client.get_bucket(@bucket)
 
     @sincedb = SinceDB::File.new(sincedb_file(@db_path))
-    
+
     FileUtils.mkdir_p(@temp_dir) unless Dir.exists?(@temp_dir)
 
     @logger.info("register", :sincedb_file => sincedb_file(@db_path))
@@ -68,8 +68,6 @@ class LogStash::Inputs::Oss < LogStash::Inputs::Base
   def new_objects
     @oss_bucket.list_objects(:prefix => @prefix, :marker => @sincedb.marker)
   end
-
-
 
   def process_new_objects(queue)
     new_objects().each do |obj|
@@ -104,7 +102,7 @@ class LogStash::Inputs::Oss < LogStash::Inputs::Base
         @logger.info("stop while reading the log file")
         return false
       end
-      
+
       @codec.decode(line) do |event|
         decorate(event)
         queue << event

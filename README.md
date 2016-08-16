@@ -1,4 +1,4 @@
-# Logstash Input Plugin for Aliyun OSS Logging
+#Logstash Input Plugin for Aliyun OSS Logging
 
 *Warning: This is still a work in progress. Do not use it for production.*
 
@@ -7,6 +7,7 @@ Once this feature is enabled, OSS pushes your bucket's access logs to specified 
 with customized filename prefix (i.e. target prefix).
 
 This Logstash input plugin collects access logs from OSS. That's it.
+
 
 ## TODOs
 * test cases
@@ -17,12 +18,13 @@ This Logstash input plugin collects access logs from OSS. That's it.
 ```
 input {
   oss {
-    type => "nginx_access"
+    type => "application/octet-stream"
     endpoint => "<endpoint>"
     access_key_id => "<your-access-key-id>"
     access_key_secret => "<your-access-key-secret>"
     bucket => "<your-target-bucket>"
     prefix => "<your-target-prefix>"
+    compression_type => "<compression_type>" none:snappy
   }
 }
 
